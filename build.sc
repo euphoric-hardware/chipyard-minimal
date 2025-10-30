@@ -246,7 +246,35 @@ object gemmini extends HasChisel {
 
 object firrtl2 extends CommonModule {
   override def millSourcePath = os.pwd / "tools" / "firrtl2"
+
+  // Generate ANTLR sources if they don't exist
+  def generateAntlrSources = T {
+    val targetDir = millSourcePath / "target" / "scala-2.13" / "src_managed" / "main"
+    val symlinkPath = millSourcePath / "src" / "target"
+    val parserFile = targetDir / "firrtl2" / "antlr" / "FIRRTLParser.java"
+
+    if (!os.exists(parserFile)) {
+      println("ANTLR sources not found. Generating with sbt...")
+      val result = os.proc("sbt", "compile")
+        .call(cwd = millSourcePath, stdout = os.Inherit, stderr = os.Inherit)
+
+      if (result.exitCode != 0) {
+        throw new Exception(s"Failed to generate ANTLR sources with sbt (exit code: ${result.exitCode})")
+      }
+    }
+
+    // Create symlink if it doesn't exist
+    if (!os.exists(symlinkPath)) {
+      os.symlink(symlinkPath, os.rel / ".." / "target")
+    }
+
+    PathRef(targetDir)
+  }
+
   override def sources = T.sources {
+    // Ensure ANTLR sources are generated
+    generateAntlrSources()
+
     val mainScala = PathRef(millSourcePath / "src" / "main" / "scala")
     val generatedSources = PathRef(millSourcePath / "src" / "target" / "scala-2.13" / "src_managed" / "main")
     Seq(mainScala, generatedSources)

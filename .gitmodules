@@ -55,6 +55,3 @@
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = https://github.com/ucb-bar/saturn-vectors.git
-[submodule "tools/firrtl2"]
-	path = tools/firrtl2
-	url = https://github.com/ucb-bar/firrtl2.git
