@@ -18,6 +18,7 @@ cd chipyard
 git checkout chipyard-minimal-macos
 
 ./scripts/build-toolchain-extra.sh riscv-tools -p $RISCV
+./scripts/repo-clean.sh
 ```
 
 ## Running sims
