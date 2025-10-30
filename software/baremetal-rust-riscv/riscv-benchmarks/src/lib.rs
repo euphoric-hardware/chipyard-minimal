@@ -10,6 +10,8 @@ use htif::{panic_htif_print, HostFile};
 use riscv::register;
 
 pub mod sort_data;
+pub mod mmio;
+pub mod nic;
 
 #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
 const BENCHMARK_DATA_COUNT: usize = 2;

@@ -1,4 +1,4 @@
-package icenet
+package testchipip.icenet
 
 import chisel3._
 

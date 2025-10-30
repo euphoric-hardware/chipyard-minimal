@@ -46,7 +46,7 @@ class GPIORocketConfig extends Config(
 
 class LoopbackNICRocketConfig extends Config(
   new chipyard.harness.WithLoopbackNIC ++                      // drive NIC IOs with loopback
-  new icenet.WithIceNIC ++                                     // add an IceNIC
+  new testchipip.icenet.WithIceNIC ++                                     // add an IceNIC
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
   new chipyard.config.AbstractConfig)
 

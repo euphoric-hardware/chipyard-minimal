@@ -128,7 +128,7 @@ ifeq ($(SUB_PROJECT),icenet)
 	VLOG_MODEL        ?= $(MODEL)
 	MODEL_PACKAGE     ?= chipyard.unittest
 	CONFIG            ?= IceNetUnitTestConfig
-	CONFIG_PACKAGE    ?= icenet
+	CONFIG_PACKAGE    ?= testchipip.icenet
 	GENERATOR_PACKAGE ?= chipyard
 	TB                ?= TestDriver
 	TOP               ?= UnitTestSuite

@@ -48,6 +48,6 @@ class dmiCheckpointingSpikeUltraFastConfig extends Config(
 class SpikeUltraFastDevicesConfig extends Config(
   new chipyard.harness.WithSimBlockDevice ++
   new chipyard.harness.WithLoopbackNIC ++
-  new icenet.WithIceNIC ++
+  new testchipip.icenet.WithIceNIC ++
   new testchipip.iceblk.WithBlockDevice ++
   new SpikeUltraFastConfig)

@@ -181,14 +181,6 @@ object rocketchipInclusiveCache extends HasChisel {
   }
 }
 
-object icenet extends HasChisel {
-  override def millSourcePath = os.pwd / "generators" / "icenet"
-  override def moduleDeps = Seq(rocketchip)
-  override def ivyDeps = T {
-    super.ivyDeps() ++ rocketchip.ivyDeps()
-  }
-}
-
 object tracegen extends HasChisel {
   override def millSourcePath = os.pwd / "generators" / "tracegen"
   override def moduleDeps = Seq(testchipip, rocketchip, rocketchipInclusiveCache, boom)
@@ -415,7 +407,7 @@ object chipyard extends HasChisel {
 
   override def moduleDeps = Seq(
     testchipip, rocketchip, boom, rocketchipBlocks, rocketchipInclusiveCache,
-    icenet, tracegen, constellation, barf, shuttle, firrtl2Bridge, dsptools, rocketDspUtils
+    tracegen, constellation, barf, shuttle, firrtl2Bridge, dsptools, rocketDspUtils
   )
   
   override def sources = T.sources {

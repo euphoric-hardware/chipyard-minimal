@@ -37,7 +37,7 @@ class Cloned64MegaBoomV3Config extends Config(
 
 class LoopbackNICLargeBoomV3Config extends Config(
   new chipyard.harness.WithLoopbackNIC ++                        // drive NIC IOs with loopback
-  new icenet.WithIceNIC ++                                       // build a NIC
+  new testchipip.icenet.WithIceNIC ++                                       // build a NIC
   new boom.v3.common.WithNLargeBooms(1) ++
   new chipyard.config.WithSystemBusWidth(128) ++
   new chipyard.config.AbstractConfig)

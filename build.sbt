@@ -159,7 +159,7 @@ lazy val chipyard = {
   val baseProjects: Seq[ProjectReference] =
     Seq(
       testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
-      icenet, tracegen,
+      tracegen,
       constellation, barf, shuttle,
       firrtl2_bridge, dsptools, rocket_dsp_utils
     ).map(sbt.Project.projectToRef)
@@ -225,11 +225,6 @@ lazy val constellation = withInitCheck((project in file("generators/constellatio
 
 lazy val tracegen = (project in file("generators/tracegen"))
   .dependsOn(testchipip, rocketchip, rocketchip_inclusive_cache, boom)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val icenet = withInitCheck((project in file("generators/icenet")), "icenet")
-  .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
