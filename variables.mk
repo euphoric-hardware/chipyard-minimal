@@ -24,9 +24,8 @@ endif
 HELP_COMPILATION_VARIABLES = \
 "   JAVA_HEAP_SIZE    = if overridden, set the default java heap size (default is 8G)" \
 "   JAVA_TOOL_OPTIONS = if overridden, set underlying java tool options (default sets misc. sizes and tmp dir)" \
-"   SBT_OPTS          = set additional sbt command line options (these take the form -Dsbt.<option>=<setting>) " \
-"                       See https://www.scala-sbt.org/1.x/docs/Command-Line-Reference.html\#Command+Line+Options" \
-"   SBT               = if overridden, used to invoke sbt (default is to invoke sbt by sbt-launch.jar)" \
+"   MILL_OPTS         = set additional mill command line options" \
+"   MILL              = if overridden, used to invoke mill (default is to invoke mill launcher)" \
 "   FIRTOOL_BIN       = path to CIRCT firtool (default: 'firtool' in PATH)" \
 "   USE_CHISEL7       = EXPERIMENTAL: set to '1' to build with Chisel 7" \
 
@@ -257,13 +256,13 @@ JAVA_TMP_DIR ?= $(base_dir)/.java_tmp
 export JAVA_TOOL_OPTIONS ?= -Xmx$(JAVA_HEAP_SIZE) -Xss8M -Djava.io.tmpdir=$(JAVA_TMP_DIR)
 
 #########################################################################################
-# default sbt launch command
+# default mill launch command
 #########################################################################################
-SCALA_BUILDTOOL_DEPS = $(SBT_SOURCES)
+SCALA_BUILDTOOL_DEPS = $(base_dir)/build.sc
 
 # passes $(JAVA_TOOL_OPTIONS) from env to java
-export SBT_OPTS ?= -Dsbt.ivy.home=$(base_dir)/.ivy2 -Dsbt.global.base=$(base_dir)/.sbt -Dsbt.boot.directory=$(base_dir)/.sbt/boot/ -Dsbt.color=always -Dsbt.supershell=false -Dsbt.server.forcestart=true
-SBT ?= java -jar $(base_dir)/scripts/sbt-launch.jar $(SBT_OPTS)
+export MILL_OPTS ?=
+MILL ?= $(base_dir)/mill $(MILL_OPTS)
 
 # (1) - classpath of the fat jar
 # (2) - main class
@@ -272,17 +271,19 @@ define run_jar_scala_main
 	cd $(base_dir) && java -cp $(1) $(2) $(3)
 endef
 
-# (1) - sbt project
+# (1) - mill module
 # (2) - main class
 # (3) - main class arguments
-define run_scala_main
-	cd $(base_dir) && $(SBT) ";project $(1); runMain $(2) $(3)"
+define run_mill_main
+	cd $(base_dir) && $(MILL) $(1).runMain $(2) $(3)
 endef
 
-# (1) - sbt project to assemble
+# (1) - mill module to assemble
 # (2) - classpath file(s) to create
-define run_sbt_assembly
-	cd $(base_dir) && $(SBT) ";project $(1); set assembly / assemblyOutputPath := file(\"$(2)\"); assembly" && touch $(2)
+define run_mill_assembly
+	cd $(base_dir) && $(MILL) $(1).assembly
+	cd $(base_dir) && $(MILL) show $(1).assembly 2>/dev/null | tail -1 | tr -d '"' | sed -E 's/^ref:[^:]*:[^:]*://' | xargs -I {} cp {} $(2)
+	touch $(2)
 endef
 
 #########################################################################################

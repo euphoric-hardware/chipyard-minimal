@@ -81,7 +81,7 @@ HELP_COMMANDS += \
 "   verilog                     = generate intermediate verilog files from chisel elaboration and firrtl passes" \
 "   firrtl                      = generate intermediate firrtl files from chisel elaboration" \
 "   run-tests                   = run all assembly and benchmark tests" \
-"   launch-sbt                  = start sbt terminal" \
+"   launch-mill                 = start mill REPL" \
 "   find-configs                = list Chipyard Config classes (eligible CONFIG=)" \
 "   find-config-fragments       = list all config. fragments" \
 "   run-firtool                 = run CIRCT firtool to emit Verilog/JSON/mem conf" \
@@ -123,9 +123,8 @@ CHIPYARD_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(CHIPYARD_SOURCE_DI
 TAPEOUT_SOURCE_DIRS = $(addprefix $(base_dir)/,tools/tapeout)
 TAPEOUT_SCALA_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(SCALA_EXT))
 TAPEOUT_VLOG_SOURCES = $(call lookup_srcs_by_multiple_type,$(TAPEOUT_SOURCE_DIRS),$(VLOG_EXT))
-# This assumes no SBT meta-build sources
-SBT_SOURCE_DIRS = $(addprefix $(base_dir)/,generators tools)
-SBT_SOURCES = $(call lookup_srcs,$(SBT_SOURCE_DIRS),sbt) $(base_dir)/build.sbt $(base_dir)/project/plugins.sbt $(base_dir)/project/build.properties
+# Mill build file
+MILL_BUILD_FILE = $(base_dir)/build.sc
 
 $(build_dir):
 	mkdir -p $@
@@ -135,12 +134,12 @@ $(build_dir):
 #########################################################################################
 $(GENERATOR_CLASSPATH) &: $(CHIPYARD_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(CHIPYARD_VLOG_SOURCES)
 	mkdir -p $(dir $@)
-	$(call run_sbt_assembly,$(SBT_PROJECT),$(GENERATOR_CLASSPATH))
+	$(call run_mill_assembly,chipyard,$(GENERATOR_CLASSPATH))
 
-# order only dependency between sbt runs needed to avoid concurrent sbt runs
+# order only dependency between mill runs needed to avoid concurrent mill runs
 $(TAPEOUT_CLASSPATH) &: $(TAPEOUT_SCALA_SOURCES) $(SCALA_BUILDTOOL_DEPS) $(TAPEOUT_VLOG_SOURCES) | $(GENERATOR_CLASSPATH)
 	mkdir -p $(dir $@)
-	$(call run_sbt_assembly,tapeout,$(TAPEOUT_CLASSPATH))
+	$(call run_mill_assembly,tapeout,$(TAPEOUT_CLASSPATH))
 
 #########################################################################################
 # verilog generation pipeline
@@ -473,12 +472,12 @@ $(dramsim_lib):
 	$(MAKE) -C $(dramsim_dir) $(notdir $@)
 
 ################################################
-# Helper to run SBT
+# Helper to run Mill
 ################################################
-SBT_COMMAND ?= shell
-.PHONY: launch-sbt
-launch-sbt:
-	cd $(base_dir) && $(SBT) "$(SBT_COMMAND)"
+MILL_COMMAND ?= repl
+.PHONY: launch-mill
+launch-mill:
+	cd $(base_dir) && $(MILL) $(MILL_COMMAND)
 
 #########################################################################################
 # print help text (and other help)
@@ -491,11 +490,11 @@ endef
 
 .PHONY: find-config-fragments
 find-config-fragments:
-	$(call run_scala_main,chipyard,chipyard.ConfigFinder,)
+	$(call run_mill_main,chipyard,chipyard.ConfigFinder,)
 
 .PHONY: find-configs
 find-configs:
-	$(call run_scala_main,chipyard,chipyard.ChipyardConfigFinder,)
+	$(call run_mill_main,chipyard,chipyard.ChipyardConfigFinder,)
 
 .PHONY: help
 help:
