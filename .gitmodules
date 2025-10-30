@@ -1,18 +1,9 @@
 [submodule "fpga/fpga-shells"]
 	path = fpga/fpga-shells
 	url = https://github.com/chipsalliance/rocket-chip-fpga-shells.git
-[submodule "generators/constellation"]
-	path = generators/constellation
-	url = https://github.com/ucb-bar/constellation.git
 [submodule "generators/gemmini"]
 	path = generators/gemmini
 	url = https://github.com/ucb-bar/gemmini.git
-[submodule "generators/hardfloat"]
-	path = generators/hardfloat
-	url = https://github.com/ucb-bar/berkeley-hardfloat.git
-[submodule "generators/icenet"]
-	path = generators/icenet
-	url = https://github.com/firesim/icenet.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
