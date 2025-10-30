@@ -25,12 +25,6 @@
 [submodule "software/baremetal-ide"]
 	path = software/baremetal-ide
 	url = https://github.com/ucb-bar/Baremetal-IDE.git
-[submodule "software/coremark"]
-	path = software/coremark
-	url = https://github.com/ucb-bar/coremark-workload.git
-[submodule "software/embench/embench-iot"]
-	path = software/embench/embench-iot
-	url = https://github.com/embench/embench-iot.git
 [submodule "software/firemarshal"]
 	path = software/firemarshal
 	url = https://github.com/firesim/FireMarshal.git
@@ -55,9 +49,6 @@
 [submodule "toolchains/riscv-tools/riscv-tests"]
 	path = toolchains/riscv-tools/riscv-tests
 	url = https://github.com/riscv-software-src/riscv-tests.git
-[submodule "toolchains/riscv-tools/riscv-tools-feedstock"]
-	path = toolchains/riscv-tools/riscv-tools-feedstock
-	url = https://github.com/ucb-bar/riscv-tools-feedstock.git
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
