@@ -16,9 +16,6 @@
 [submodule "software/spec2017"]
 	path = software/spec2017
 	url = https://github.com/ucb-bar/spec2017-workload.git
-[submodule "toolchains/libgloss"]
-	path = toolchains/libgloss
-	url = https://github.com/ucb-bar/libgloss-htif.git
 [submodule "toolchains/riscv-tools/riscv-isa-sim"]
 	path = toolchains/riscv-tools/riscv-isa-sim
 	url = https://github.com/riscv-software-src/riscv-isa-sim.git
