@@ -16,20 +16,6 @@ define require_cmd
 		|| { echo "Error: $(1) not found in PATH. Set up your tool environment before building this target." >&2; exit 1; }
 endef
 
-# Require minimum firtool version when building with Chisel 7
-define require_firtool_version
-	@if [ -n "$(USE_CHISEL7)" ]; then \
-	  vline=`$(FIRTOOL_BIN) --version 2>/dev/null | grep -E 'CIRCT firtool-[0-9]+\.[0-9]+\.[0-9]+' | head -1`; \
-	  vstr=$${vline##*firtool-}; \
-	  if [ -z "$$vstr" ]; then \
-	    echo "Error: Unable to parse firtool version. Ensure '$(FIRTOOL_BIN) --version' prints 'CIRCT firtool-X.Y.Z'." >&2; exit 1; \
-	  fi; \
-	  maj=$${vstr%%.*}; rest=$${vstr#*.}; min=$${rest%%.*}; pat=$${rest#*.}; \
-	  if [ "$$maj" -lt 1 ] || { [ "$$maj" -eq 1 ] && [ "$$min" -lt 129 ]; }; then \
-	    echo "Error: USE_CHISEL7 requires firtool >= 1.129.0, found $$vstr. Please update CIRCT firtool." >&2; exit 1; \
-	  fi; \
-	fi
-endef
 
 #########################################################################################
 # specify user-interface variables
@@ -175,9 +161,6 @@ export mfc_extra_anno_contents
 export sfc_extra_low_transforms_anno_contents
 $(FINAL_ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) &: $(ANNO_FILE)
 	echo "$$mfc_extra_anno_contents" > $(MFC_EXTRA_ANNO_FILE)
-ifdef USE_CHISEL7
-	jq '. + [{"class":"firrtl.transforms.BlackBoxTargetDirAnno","targetDir":"$(GEN_COLLATERAL_DIR)/blackboxes"}]' $(MFC_EXTRA_ANNO_FILE) > $(MFC_EXTRA_ANNO_FILE).tmp && mv $(MFC_EXTRA_ANNO_FILE).tmp $(MFC_EXTRA_ANNO_FILE)
-endif
 	jq -s '[.[][]]' $(ANNO_FILE) $(MFC_EXTRA_ANNO_FILE) > $(FINAL_ANNO_FILE)
 
 .PHONY: firrtl
@@ -198,11 +181,7 @@ SFC_MFC_TARGETS = \
 
 MFC_BASE_LOWERING_OPTIONS ?= emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,disallowPortDeclSharing,locationInfoStyle=wrapInAtSquareBracket
 
-# Extra firtool flags are only applied when building with Chisel 7
 FIRTOOL_EXTRA_FLAGS ?=
-ifdef USE_CHISEL7
-FIRTOOL_EXTRA_FLAGS += --verification-flavor=if-else-fatal --disable-layers=Verification.Assume,Verification.Cover
-endif
 
 # DOC include start: FirrtlCompiler
 $(MFC_LOWERING_OPTIONS):
@@ -215,7 +194,6 @@ endif
 
 $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 	$(call require_cmd,$(FIRTOOL_BIN))
-	$(require_firtool_version)
 	rm -rf $(GEN_COLLATERAL_DIR)
 	(set -o pipefail && $(FIRTOOL_BIN) \
 			--format=fir \
@@ -234,18 +212,8 @@ $(SFC_MFC_TARGETS) &: $(FIRRTL_FILE) $(FINAL_ANNO_FILE) $(MFC_LOWERING_OPTIONS)
 			-o $(GEN_COLLATERAL_DIR) \
 			$(FIRRTL_FILE) |& tee $(FIRTOOL_LOG_FILE))
 	$(SED) $(SED_INPLACE) 's/.*/& /' $(MFC_SMEMS_CONF) # need trailing space for SFC macrocompiler
-ifdef USE_CHISEL7
-	# Construct blackbox file list from files emitted into gen-collateral/blackboxes
-	@if [ -d "$(GEN_COLLATERAL_DIR)/blackboxes" ]; then \
-	  find "$(GEN_COLLATERAL_DIR)/blackboxes" -type f \( -name '*.v' -o -name '*.sv' -o -name '*.cc' \) | \
-	    sed -e 's;^$(GEN_COLLATERAL_DIR)/;;' > "$(MFC_BB_MODS_FILELIST)"; \
-	else \
-	  : > "$(MFC_BB_MODS_FILELIST)"; \
-	fi
-else
 	# If there are no BB's then the file might not be generated; ensure it exists
 	touch $(MFC_BB_MODS_FILELIST)
-endif
 # DOC include end: FirrtlCompiler
 
 .PHONY: run-firtool

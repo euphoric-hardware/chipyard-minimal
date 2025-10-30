@@ -7,7 +7,6 @@ import coursier.maven.MavenRepository
 object v {
   val scala = "2.13.16"
   val chisel6 = "6.7.0"
-  val chisel7 = "7.0.0-RC4"
   val chisel3 = "3.6.1"
   val chiselTest = "6.0.0"
   val sourcecode = "0.3.1"
@@ -29,7 +28,6 @@ object v {
   )
 }
 
-def useChisel7 = T.input { sys.env.contains("USE_CHISEL7") }
 
 trait CommonModule extends ScalaModule {
   def scalaVersion = v.scala
@@ -56,9 +54,7 @@ trait CommonModule extends ScalaModule {
 }
 
 trait HasChisel extends CommonModule {
-  def chiselVersion = T {
-    if (useChisel7()) v.chisel7 else v.chisel6
-  }
+  def chiselVersion = T { v.chisel6 }
 
   override def ivyDeps = T {
     super.ivyDeps() ++ Agg(
@@ -368,16 +364,12 @@ object chipyard extends HasChisel {
 
   override def moduleDeps = Seq(
     testchipip, rocketchip, boom, rocketchipBlocks, rocketchipInclusiveCache,
-    icenet, tracegen, constellation, barf, shuttle, firrtl2Bridge
+    icenet, tracegen, constellation, barf, shuttle, firrtl2Bridge, dsptools, rocketDspUtils
   )
   
   override def sources = T.sources {
     val baseDir = millSourcePath / "src" / "main" / "scala"
-    val stageDir = if (useChisel7()) {
-      os.pwd / "tools" / "stage-chisel7" / "src" / "main" / "scala"
-    } else {
-      os.pwd / "tools" / "stage" / "src" / "main" / "scala"
-    }
+    val stageDir = os.pwd / "tools" / "stage" / "src" / "main" / "scala"
 
     val excludeDirs = Seq(
       baseDir / "example" / "dsptools",  // Exclude dsptools examples

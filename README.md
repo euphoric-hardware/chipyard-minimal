@@ -49,8 +49,6 @@ git clone git@github.com:ucb-bar/chipyard.git
 cd chipyard
 git checkout chipyard-minimal-macos
 
-./scripts/init-submodules-no-riscv-tools-nolog.sh
-
 ./scripts/build-toolchain-extra.sh riscv-tools -p $RISCV
 ```
 

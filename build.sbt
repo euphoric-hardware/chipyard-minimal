@@ -1,7 +1,6 @@
 import Tests._
 
 val chisel6Version = "6.7.0"
-val chisel7Version = "7.0.0-RC4"
 val chiselTestVersion = "6.0.0"
 val scalaVersionFromChisel = "2.13.16"
 
@@ -93,17 +92,12 @@ lazy val chisel6Settings = Seq(
   libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % chisel6Version),
   addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chisel6Version cross CrossVersion.full)
 )
-lazy val chisel7Settings = Seq(
-  libraryDependencies ++= Seq("org.chipsalliance" %% "chisel" % chisel7Version),
-  addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chisel7Version cross CrossVersion.full)
-)
 lazy val chisel3Settings = Seq(
   libraryDependencies ++= Seq("edu.berkeley.cs" %% "chisel3" % chisel3Version),
   addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chisel3Version cross CrossVersion.full)
 )
 
-// Select Chisel 7 when USE_CHISEL7 is set in the environment; default to Chisel 6.
-lazy val chiselSettings = (if (sys.env.contains("USE_CHISEL7")) chisel7Settings else chisel6Settings) ++ Seq(
+lazy val chiselSettings = chisel6Settings ++ Seq(
   libraryDependencies ++= Seq(
     "org.apache.commons" % "commons-lang3" % "3.12.0",
     "org.apache.commons" % "commons-text" % "1.9"
@@ -121,17 +115,11 @@ lazy val scalaTestSettings =  Seq(
 
 // -- Rocket Chip --
 
-lazy val hardfloat = {
-  val useChisel7 = sys.env.contains("USE_CHISEL7")
-  var hf = freshProject("hardfloat", file("generators/hardfloat/hardfloat"))
-    .settings(chiselSettings)
-    .settings(commonSettings)
-    .settings(scalaTestSettings)
-  if (!useChisel7) {
-    hf = hf.dependsOn(midas_target_utils)
-  }
-  hf
-}
+lazy val hardfloat = freshProject("hardfloat", file("generators/hardfloat/hardfloat"))
+  .dependsOn(midas_target_utils)
+  .settings(chiselSettings)
+  .settings(commonSettings)
+  .settings(scalaTestSettings)
 
 lazy val rocketMacros  = (project in rocketChipDir / "macros")
   .settings(commonSettings)
@@ -166,7 +154,6 @@ lazy val testchipip = withInitCheck((project in file("generators/testchipip")), 
   .settings(commonSettings)
 
 lazy val chipyard = {
-  val useChisel7 = sys.env.contains("USE_CHISEL7")
   // Base chipyard project with always-on dependencies
   // Use explicit Project(...) so the project id remains 'chipyard'
   val baseProjects: Seq[ProjectReference] =
@@ -174,32 +161,11 @@ lazy val chipyard = {
       testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
       icenet, tracegen,
       constellation, barf, shuttle,
-    ).map(sbt.Project.projectToRef) ++
-    (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(firrtl2_bridge))) ++
-    (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(dsptools), sbt.Project.projectToRef(rocket_dsp_utils)))
+      firrtl2_bridge, dsptools, rocket_dsp_utils
+    ).map(sbt.Project.projectToRef)
 
   val baseDeps: Seq[sbt.ClasspathDep[sbt.ProjectReference]] =
     baseProjects.map(pr => sbt.ClasspathDependency(pr, None))
-
-  // Optional settings to exclude specific sources under Chisel 7
-  val dspExcludeSettings: Seq[Def.Setting[_]] = if (useChisel7) Seq(
-    Compile / unmanagedSources := {
-      val files = (Compile / unmanagedSources).value
-      val root = (ThisBuild / baseDirectory).value
-      val excludeList = Seq(
-        // Directories or files relative to repo root
-        "generators/chipyard/src/main/scala/example/dsptools",
-        "generators/chipyard/src/main/scala/config/MMIOAcceleratorConfigs.scala",
-        "generators/chipyard/src/main/scala/config/TutorialConfigs.scala",
-        "generators/chipyard/src/main/scala/upf"
-      ).map(p => (root / p).getCanonicalFile)
-      val (excludeDirs, excludeFiles) = excludeList.partition(_.isDirectory)
-      files.filterNot { f =>
-        val cf = f.getCanonicalFile
-        excludeFiles.contains(cf) || excludeDirs.exists(d => cf.toPath.startsWith(d.toPath))
-      }
-    }
-  ) else Seq.empty
 
   var cy = Project(id = "chipyard", base = file("generators/chipyard"))
     .dependsOn(baseDeps: _*)
@@ -210,11 +176,7 @@ lazy val chipyard = {
       )
     )
     .settings(commonSettings)
-    .settings(Compile / unmanagedSourceDirectories += {
-      if (useChisel7) file("tools/stage-chisel7/src/main/scala")
-      else file("tools/stage/src/main/scala")
-    })
-    .settings(dspExcludeSettings: _*)
+    .settings(Compile / unmanagedSourceDirectories += file("tools/stage/src/main/scala"))
 
   // Optional modules discovered via initialized submodules (no env or manifest)
   val optionalModules: Seq[(String, ProjectReference)] = Seq(

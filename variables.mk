@@ -27,7 +27,6 @@ HELP_COMPILATION_VARIABLES = \
 "   MILL_OPTS         = set additional mill command line options" \
 "   MILL              = if overridden, used to invoke mill (default is to invoke mill launcher)" \
 "   FIRTOOL_BIN       = path to CIRCT firtool (default: 'firtool' in PATH)" \
-"   USE_CHISEL7       = EXPERIMENTAL: set to '1' to build with Chisel 7" \
 
 HELP_PROJECT_VARIABLES = \
 "   SUB_PROJECT            = use the specific subproject default variables [$(SUB_PROJECT)]" \
