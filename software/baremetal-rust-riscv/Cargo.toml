@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "htif",
+    "riscv-benchmarks",
+]
+
+[profile.release]
+strip = "debuginfo"
+lto = true
