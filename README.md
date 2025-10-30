@@ -1,14 +1,44 @@
 # Chipyard on ARM-Mac
 
-This documentation provides a step by step tutorial on how to run chipyard stuff on a ARM based Mac machine.
+This is a lightweight chipyard.
+No more conda, submodules, CI, irrelevant accelerator IP, and garbage software tests.
 
 ## Install dependencies
 
 - firtool-1.75.0*
 - Verilator 5.027
 - `java -version`: openjdk version "17.0.17" 2025-10-21 (probably works with off the shelf java versions)
+- `riscv-gnu-toolchain`: you should be able to compile this from source #compiling-riscv-toolchain-from-source
 
-## Compiling riscv-gnu toolchains from source
+## Clone Chipyard
+
+```bash
+git clone git@github.com:ucb-bar/chipyard.git
+cd chipyard
+git checkout chipyard-minimal-macos
+
+./scripts/build-toolchain-extra.sh riscv-tools -p $RISCV
+```
+
+## Running sims
+
+- Assuming verilator is in your path
+
+```bash
+export TMPDIR=/tmp
+export JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/tmp"
+make run-binary-debug -j8 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/towers.riscv CONFIG=RocketConfig
+```
+
+Why the `export JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/tmp"` (*GPT-generated response*)??
+
+- Root cause: sbt’s JNI Unix-domain socket binder (`JNIUnixDomainSocketLibraryProvider_bindNative`) tried to memcpy a socket path longer than the OS buffer, and macOS’s checked libc aborted with `__chk_fail_overflow`. On macOS, `struct sockaddr_un { … char sun_path[104]; }` → the maximum path length is 103 chars plus NUL. Your stack shows the abort from `__memcpy_chk`, exactly what happens when the socket pathname >103 bytes.
+- Why this happens with sbt on macOS:
+    - sbt server puts its socket under `java.io.tmpdir` (usually `$TMPDIR`, e.g. `/var/folders/.../T/`), then appends a long sbt-… subdir and filename.
+    - macOS `$TMPDIR` paths are often 45–70 chars by themselves. Add sbt’s suffix (~50–70 chars) → total can exceed 103.
+    - You’re forcing server mode with `-Dsbt.server.forcestart=true`, so sbt always tries to create that UDS path and trips the overflow.
+
+## Compiling riscv toolchain from source
 
 1. [Create a disk volume that is case sensitive](https://brianboyko.medium.com/a-case-sensitive-src-folder-for-mac-programmers-176cc82a3830)
 
@@ -41,32 +71,3 @@ mkdir build && cd build
 gmake -j8
 ```
 
-
-## Clone Chipyard
-
-```bash
-git clone git@github.com:ucb-bar/chipyard.git
-cd chipyard
-git checkout chipyard-minimal-macos
-
-./scripts/build-toolchain-extra.sh riscv-tools -p $RISCV
-```
-
-
-## Running sims
-
-- Assuming verilator is in your path
-
-```bash
-export TMPDIR=/tmp
-export JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/tmp"
-make run-binary-debug -j8 BINARY=$RISCV/riscv64-unknown-elf/share/riscv-tests/benchmarks/towers.riscv CONFIG=RocketConfig
-```
-
-Why the `export JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/tmp"` (*GPT-generated response*)??
-
-- Root cause: sbt’s JNI Unix-domain socket binder (`JNIUnixDomainSocketLibraryProvider_bindNative`) tried to memcpy a socket path longer than the OS buffer, and macOS’s checked libc aborted with `__chk_fail_overflow`. On macOS, `struct sockaddr_un { … char sun_path[104]; }` → the maximum path length is 103 chars plus NUL. Your stack shows the abort from `__memcpy_chk`, exactly what happens when the socket pathname >103 bytes.
-- Why this happens with sbt on macOS:
-    - sbt server puts its socket under `java.io.tmpdir` (usually `$TMPDIR`, e.g. `/var/folders/.../T/`), then appends a long sbt-… subdir and filename.
-    - macOS `$TMPDIR` paths are often 45–70 chars by themselves. Add sbt’s suffix (~50–70 chars) → total can exceed 103.
-    - You’re forcing server mode with `-Dsbt.server.forcestart=true`, so sbt always tries to create that UDS path and trips the overflow.
