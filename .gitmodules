@@ -34,12 +34,6 @@
 [submodule "tools/axe"]
 	path = tools/axe
 	url = https://github.com/CTSRD-CHERI/axe.git
-[submodule "tools/circt"]
-	path = tools/circt
-	url = https://github.com/llvm/circt.git
-[submodule "tools/install-circt"]
-	path = tools/install-circt
-	url = https://github.com/circt/install-circt.git
 [submodule "tools/rocket-dsp-utils"]
 	path = tools/rocket-dsp-utils
 	url = https://github.com/ucb-bar/rocket-dsp-utils.git
