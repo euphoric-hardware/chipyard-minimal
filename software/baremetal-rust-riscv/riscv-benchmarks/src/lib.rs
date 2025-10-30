@@ -12,6 +12,8 @@ use riscv::register;
 pub mod sort_data;
 pub mod mmio;
 pub mod nic;
+pub mod blkdev;
+pub mod marchid;
 
 #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
 const BENCHMARK_DATA_COUNT: usize = 2;
