@@ -219,20 +219,8 @@ lazy val chipyard = {
   // Optional modules discovered via initialized submodules (no env or manifest)
   val optionalModules: Seq[(String, ProjectReference)] = Seq(
     // Generators with Chipyard-facing glue compiled from their repos
-    "cva6" -> cva6,
-    "ibex" -> ibex,
-    "vexiiriscv" -> vexiiriscv,
-    "riscv-sodor" -> sodor,
-    "ara" -> ara,
     "saturn" -> saturn,
-    "tacit" -> tacit,
-    "gemmini" -> gemmini,
-    "nvdla" -> nvdla,
-    "radiance" -> radiance,
-    "caliptra-aes-acc" -> caliptra_aes,
-    "compress-acc" -> compressacc,
-    "mempress" -> mempress,
-    "fft-generator" -> fft_generator
+    "gemmini" -> gemmini
   )
 
   // Discover optional modules if their submodule is initialized
@@ -258,16 +246,6 @@ lazy val chipyard = {
   cy
 }
 
-lazy val compressacc = withInitCheck((project in file("generators/compress-acc")), "compress-acc")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val mempress = withInitCheck((project in file("generators/mempress")), "mempress")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
 lazy val barf = withInitCheck((project in file("generators/bar-fetchers")), "bar-fetchers")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -280,11 +258,6 @@ lazy val saturn = withInitCheck((project in file("generators/saturn")), "saturn"
 
 lazy val constellation = withInitCheck((project in file("generators/constellation")), "constellation")
   .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val fft_generator = withInitCheck((project in file("generators/fft-generator")), "fft-generator")
-  .dependsOn(rocketchip, rocket_dsp_utils, testchipip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -329,63 +302,7 @@ def withInitCheck(p: Project, genDirName: String): Project = {
   )
 }
 
-lazy val cva6 = withInitCheck((project in file("generators/cva6")), "cva6")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val ara = withInitCheck((project in file("generators/ara")), "ara")
-  .dependsOn(rocketchip, shuttle)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val ibex = withInitCheck((project in file("generators/ibex")), "ibex")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val vexiiriscv = withInitCheck((project in file("generators/vexiiriscv")), "vexiiriscv")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val sodor = withInitCheck((project in file("generators/riscv-sodor")), "riscv-sodor")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val radiance = withInitCheck((project in file("generators/radiance")), "radiance")
-  .dependsOn(rocketchip, gemmini, testchipip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(libraryDependencies ++= Seq(
-      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
-      "org.scalatest" %% "scalatest" % "3.2.+" % "test",
-      "junit" % "junit" % "4.13" % "test",
-      "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
-  ))
-  .settings(commonSettings)
-
 lazy val gemmini = withInitCheck(freshProject("gemmini", file("generators/gemmini")), "gemmini")
-  .dependsOn(rocketchip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val nvdla = withInitCheck((project in file("generators/nvdla")), "nvdla")
-  .dependsOn(rocketchip, testchipip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val tacit = withInitCheck((project in file("generators/tacit")), "tacit")
-  .dependsOn(rocketchip, shuttle, testchipip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val caliptra_aes = withInitCheck((project in file("generators/caliptra-aes-acc")), "caliptra-aes-acc")
-  .dependsOn(rocketchip, rocc_acc_utils, testchipip)
-  .settings(libraryDependencies ++= rocketLibDeps.value)
-  .settings(commonSettings)
-
-lazy val rocc_acc_utils = withInitCheck((project in file("generators/rocc-acc-utils")), "rocc-acc-utils")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
