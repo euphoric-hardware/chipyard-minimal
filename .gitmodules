@@ -13,12 +13,6 @@
 [submodule "generators/icenet"]
 	path = generators/icenet
 	url = https://github.com/firesim/icenet.git
-[submodule "generators/mempress"]
-	path = generators/mempress
-	url = https://github.com/ucb-bar/mempress.git
-[submodule "generators/rocc-acc-utils"]
-	path = generators/rocc-acc-utils
-	url = https://github.com/ucb-bar/rocc-acc-utils.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
@@ -73,9 +67,6 @@
 [submodule "tools/fixedpoint"]
 	path = tools/fixedpoint
 	url = https://github.com/ucb-bar/fixedpoint.git
-[submodule "generators/compress-acc"]
-	path = generators/compress-acc
-	url = https://github.com/ucb-bar/compress-acc.git
 [submodule "generators/saturn"]
 	path = generators/saturn
 	url = https://github.com/ucb-bar/saturn-vectors.git
