@@ -247,37 +247,60 @@ object gemmini extends HasChisel {
 object firrtl2 extends CommonModule {
   override def millSourcePath = os.pwd / "tools" / "firrtl2"
 
-  // Generate ANTLR sources if they don't exist
-  def generateAntlrSources = T {
-    val targetDir = millSourcePath / "target" / "scala-2.13" / "src_managed" / "main"
-    val symlinkPath = millSourcePath / "src" / "target"
-    val parserFile = targetDir / "firrtl2" / "antlr" / "FIRRTLParser.java"
+  // Only include main sources, not test sources
+  override def sources = T.sources {
+    Seq(PathRef(millSourcePath / "src" / "main" / "scala"))
+  }
 
-    if (!os.exists(parserFile)) {
-      println("ANTLR sources not found. Generating with sbt...")
-      val result = os.proc("sbt", "compile")
-        .call(cwd = millSourcePath, stdout = os.Inherit, stderr = os.Inherit)
+  // Generate ANTLR and BuildInfo sources using sbt
+  def generateSbtSources = T {
+    val sbtTargetDir = millSourcePath / "target" / "scala-2.13" / "src_managed" / "main"
+    val antlrOutputDir = sbtTargetDir / "firrtl2" / "antlr"
+    val buildInfoFile = sbtTargetDir / "firrtl2" / "BuildInfo.scala"
+    val parserFile = antlrOutputDir / "FIRRTLParser.java"
 
-      if (result.exitCode != 0) {
-        throw new Exception(s"Failed to generate ANTLR sources with sbt (exit code: ${result.exitCode})")
+    val needsGeneration = !os.exists(parserFile) || !os.exists(buildInfoFile)
+
+    if (needsGeneration) {
+      println("Generating ANTLR and BuildInfo sources using sbt...")
+
+      // Run both sbt tasks
+      os.proc("sbt", "Antlr4/antlr4Generate", "buildInfo")
+        .call(cwd = millSourcePath, stdout = os.Inherit, stderr = os.Inherit, check = false)
+
+      // Verify files were generated
+      if (!os.exists(parserFile)) {
+        throw new Exception("Failed to generate ANTLR parser sources")
+      }
+      if (!os.exists(buildInfoFile)) {
+        throw new Exception("Failed to generate BuildInfo")
       }
     }
 
-    // Create symlink if it doesn't exist
-    if (!os.exists(symlinkPath)) {
-      os.symlink(symlinkPath, os.rel / ".." / "target")
+    // Copy generated sources to Mill's output directory to track them properly
+    val destAntlr = T.dest / "firrtl2" / "antlr"
+    val destBuildInfo = T.dest / "firrtl2"
+    os.makeDir.all(destAntlr)
+    os.makeDir.all(destBuildInfo)
+
+    // Copy ANTLR files
+    if (os.exists(antlrOutputDir)) {
+      os.walk(antlrOutputDir).filter(os.isFile).foreach { file =>
+        val rel = file.relativeTo(antlrOutputDir)
+        os.copy.over(file, destAntlr / rel, createFolders = true)
+      }
     }
 
-    PathRef(targetDir)
+    // Copy BuildInfo
+    if (os.exists(buildInfoFile)) {
+      os.copy.over(buildInfoFile, destBuildInfo / "BuildInfo.scala")
+    }
+
+    PathRef(T.dest)
   }
 
-  override def sources = T.sources {
-    // Ensure ANTLR sources are generated
-    generateAntlrSources()
-
-    val mainScala = PathRef(millSourcePath / "src" / "main" / "scala")
-    val generatedSources = PathRef(millSourcePath / "src" / "target" / "scala-2.13" / "src_managed" / "main")
-    Seq(mainScala, generatedSources)
+  override def generatedSources = T {
+    super.generatedSources() ++ Seq(generateSbtSources())
   }
 
   override def scalacOptions = T {
