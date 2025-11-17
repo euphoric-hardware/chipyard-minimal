@@ -5,7 +5,6 @@ use riscv_benchmarks::*;
 use riscv_rt::entry;
 use md5::{Md5, Digest};
 use md5::digest::generic_array::{typenum, GenericArray};
-use core::fmt::Write;
 use core::hint::black_box;
 
 const MSG_SIZE: usize = 10;
@@ -25,13 +24,8 @@ fn main() -> ! {
     }
     for _ in 0..SCALE_FACTOR {
         let benchmark_data = start_benchmark();
-        black_box(compute_hash(black_box(data)));
+        let x = black_box(compute_hash(black_box(data)));
         print_benchmark_data(benchmark_data);
-        // for h in hash {
-        //     write!(htif::HostFile::stdout(), "{:02x?}", h).unwrap();
-        // }
-        // writeln!(htif::HostFile::stdout(), "").unwrap();
     }
-    // verify_and_end_benchmark(&[1], &[1], benchmark_data);
     exit();
 }

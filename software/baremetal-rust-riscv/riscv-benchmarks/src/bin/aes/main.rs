@@ -1,7 +1,7 @@
 #![no_main]
 #![no_std]
 
-use aes::{cipher::{generic_array::GenericArray, typenum, BlockDecrypt, BlockEncrypt, BlockSizeUser, KeyInit}, Aes256};
+use aes::{cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, BlockSizeUser, KeyInit}, Aes256};
 use data::*;
 use riscv_benchmarks::*;
 use riscv_rt::entry;
@@ -19,10 +19,7 @@ fn main() -> ! {
     assert!(BLOCK_SIZE == Aes256::block_size());
 
     let mut blocks = [GenericArray::from([0_u8; 16]); LEN/BLOCK_SIZE];
-    let block_copy = blocks.clone();
-    // let blocks: [GenericArray<_, typenum::U16>; 32] = PLAINTEXT.chunks(Aes256::block_size())
-    //     .map(|x| *GenericArray::from_slice(x)).collect();
-    
+
     // We have to manually split blocks. In reality, data should be encrypted with a mode of
     // operation.
     for (block, chunk) in blocks.iter_mut().zip(PLAINTEXT.chunks(Aes256::block_size())) {

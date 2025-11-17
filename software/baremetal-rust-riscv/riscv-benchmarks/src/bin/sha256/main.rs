@@ -10,13 +10,11 @@ mod data;
 
 const SCALE_FACTOR: usize = 475;
 
-// Very dumb AES, encrypts each block directly, no mode of operation
-
 #[entry]
 fn main() -> ! {
     // block_size() is not a const fn
     let benchmark_data = start_benchmark();
-    
+
     for _ in 0..SCALE_FACTOR {
         let mut hasher = Sha256::new();
         hasher.update(MSG);

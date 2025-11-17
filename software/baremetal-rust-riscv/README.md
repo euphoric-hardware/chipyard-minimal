@@ -48,6 +48,44 @@ To change memory size:
 
 ### Benchmarks
 
+#### Available Benchmarks
+
+**Classic Algorithms:**
+- `median` - Median filter algorithm
+- `qsort` - Quicksort implementation with insertion sort for small subarrays
+- `rsort` - Radix sort using radsort crate
+- `sort` - Sorting algorithm
+- `multiply` - Integer multiplication
+- `vvadd` - Vector-vector addition
+- `memcpy` - Memory copy operations
+- `matmult` - Matrix multiplication
+- `towers` - Towers of Hanoi
+
+**Cryptography & Hashing:**
+- `aes` - AES encryption
+- `md5sum` - MD5 hash computation
+- `sha256` - SHA-256 hash computation
+- `aha-mont64` - Montgomery multiplication (modular arithmetic)
+
+**Data Compression:**
+- `compress_decompress` - Compression/decompression using miniz_oxide
+- `huffman` - Huffman encoding/decoding with tree construction
+
+**Graph & Search Algorithms:**
+- `graph-traversal` - BFS, DFS (iterative & recursive), cycle detection, topological sort
+- `sat-solver` - Mini SAT solver using DPLL algorithm with unit propagation
+
+**Data Serialization:**
+- `json-serde` - JSON serialization/deserialization using serde-json-core
+
+**I/O & Device:**
+- `blkdev` - Block device operations
+- `nic-loopback` - Network interface loopback test
+- `hello` / `mt-hello` - Hello world examples (single/multi-threaded)
+- `microbench` - Micro-benchmarking utilities
+
+#### Notes
+
 - Port benchmarks from riscv tests
 - Cycles should be similar?
 - Not sure if cycles are accurate, might need more testing / investigating.
