@@ -49,7 +49,8 @@ extern "C" void cospike_cosim_wrapper(long long int cycle,
                               int raise_interrupt,
                               unsigned long long int cause,
                               unsigned long long int wdata,
-                              int priv)
+                              int priv,
+                              int reset)
 {
   int rval = cospike_cosim(
     cycle,
@@ -62,7 +63,8 @@ extern "C" void cospike_cosim_wrapper(long long int cycle,
     raise_interrupt,
     cause,
     wdata,
-    priv
+    priv,
+    reset
   );
   if (rval) exit(rval);
 }

@@ -92,6 +92,8 @@ extern "C" void debug_rob_pop_trace(int hartid,
 				    long long int* trace_tval,
 				    long long int* trace_wdata) {
   *trace_valid = 0;
+  *trace_interrupt = 0;
+  *trace_exception = 0;
   if (debug_robs.find(hartid) == debug_robs.end()) return;
   if (debug_robs[hartid]->rob.empty()) return;
 

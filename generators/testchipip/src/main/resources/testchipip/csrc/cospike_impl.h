@@ -30,7 +30,8 @@ int cospike_cosim(
   int raise_interrupt,
   unsigned long long int cause,
   unsigned long long int wdata,
-  int priv);
+  int priv,
+  int reset);
 
 void cospike_register_memory(
   unsigned long long int base,

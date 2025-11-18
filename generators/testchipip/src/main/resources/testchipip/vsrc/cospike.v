@@ -23,7 +23,8 @@ import "DPI-C" function void cospike_cosim_wrapper(input longint cycle,
                                            input bit     raise_interrupt,
                                            input longint cause,
                                            input longint wdata,
-                                           input int     priv
+                                           input int     priv,
+                                           input bit     reset
                                            );
 
 import "DPI-C" function void cospike_register_memory_wrapper(input longint base,
@@ -105,22 +106,22 @@ module SpikeCosim  #(
          if (trace_0_valid || trace_0_exception || trace_0_cause) begin
             cospike_cosim_wrapper(cycle, hartid, trace_0_has_wdata, trace_0_valid, trace_0_iaddr,
                                   trace_0_insn, trace_0_exception, trace_0_interrupt, trace_0_cause,
-                                  trace_0_wdata, trace_0_priv);
+                                  trace_0_wdata, trace_0_priv, reset);
          end
          if (trace_1_valid || trace_1_exception || trace_1_cause) begin
             cospike_cosim_wrapper(cycle, hartid, trace_1_has_wdata, trace_1_valid, trace_1_iaddr,
                                   trace_1_insn, trace_1_exception, trace_1_interrupt, trace_1_cause,
-                                  trace_1_wdata, trace_1_priv);
+                                  trace_1_wdata, trace_1_priv, reset);
          end
          if (trace_2_valid || trace_2_exception || trace_2_cause) begin
             cospike_cosim_wrapper(cycle, hartid, trace_2_has_wdata, trace_2_valid, trace_2_iaddr,
                                   trace_2_insn, trace_2_exception, trace_2_interrupt, trace_2_cause,
-                                  trace_2_wdata, trace_2_priv);
+                                  trace_2_wdata, trace_2_priv, reset);
          end
          if (trace_3_valid || trace_3_exception || trace_3_cause) begin
             cospike_cosim_wrapper(cycle, hartid, trace_3_has_wdata, trace_3_valid, trace_3_iaddr,
                                   trace_3_insn, trace_3_exception, trace_3_interrupt, trace_3_cause,
-                                  trace_3_wdata, trace_3_priv);
+                                  trace_3_wdata, trace_3_priv, reset);
          end
       end
    end

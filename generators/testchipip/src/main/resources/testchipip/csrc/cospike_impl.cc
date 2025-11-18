@@ -189,9 +189,11 @@ int cospike_cosim(unsigned long long int cycle,
                   int raise_interrupt,
                   unsigned long long int cause,
                   unsigned long long int wdata,
-                  int priv)
+                  int priv,
+                  int reset)
 {
   assert(info);
+  assert(reset == 0);
 
   if (!cospike_enable) { return 0; }
   if (unlikely(!sim)) {
@@ -428,7 +430,7 @@ int cospike_cosim(unsigned long long int cycle,
   // set mip.seip to trigger the interrupt, but restore
   bool unset_seip = false;
   if (raise_interrupt) {
-    COSPIKE_PRINTF("%" PRIu64 " interrupt %" PRIx32 "\n", cycle, cause);
+    COSPIKE_PRINTF("%" PRIu64 " interrupt %" PRIx32 " valid %d\n", cycle, cause, valid);
 
     if (ssip_interrupt || stip_interrupt) {
       // do nothing
@@ -452,7 +454,7 @@ int cospike_cosim(unsigned long long int cycle,
     }
   }
   if (raise_exception)
-    COSPIKE_PRINTF("%" PRIu64 " exception %" PRIx32 "\n", cycle, cause);
+    COSPIKE_PRINTF("%" PRIu64 " exception %" PRIx32 " valid %d\n", cycle, cause, valid);
   if (valid) {
     p->clear_waiting_for_interrupt();
     if (cospike_printf) {
