@@ -22,6 +22,7 @@ miniz_oxide = "0.8.8"
 serde-json-core = "0.6.0"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 heapless = "0.8"
+regex-automata = { version = "0.4", default-features = false, features = ["alloc", "meta", "nfa-pikevm", "dfa-search"] }
 
 [features]
 std = []
