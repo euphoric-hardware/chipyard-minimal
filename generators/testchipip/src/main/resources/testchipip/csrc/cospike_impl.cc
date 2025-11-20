@@ -120,13 +120,13 @@ bool mem_already_exists(uint64_t base, uint64_t size) {
 }
 
 void cospike_set_sysinfo(char* isa, char* priv, int pmpregions, int maxpglevels,
-			 unsigned long long int mem0_base, unsigned long long int mem0_size,
-			 unsigned long long int mem1_base, unsigned long long int mem1_size,
-                         unsigned long long int mem2_base, unsigned long long int mem2_size,
-			 int nharts,
-			 char* bootrom,
-			 std::vector<std::string> &args
-			 ) {
+       unsigned long long int mem0_base, unsigned long long int mem0_size,
+       unsigned long long int mem1_base, unsigned long long int mem1_size,
+       unsigned long long int mem2_base, unsigned long long int mem2_size,
+       int nharts,
+       char* bootrom,
+       std::vector<std::string> &args
+       ) {
   if (!info) {
     info = new system_info_t;
     // technically the targets aren't zicntr compliant, but they implement the zicntr registers
@@ -471,6 +471,8 @@ int cospike_cosim(unsigned long long int cycle,
       COSPIKE_PRINTF("spike mip is %" PRIx64 "\n", s->mip->read());
       COSPIKE_PRINTF("spike mie is %" PRIx64 "\n", s->mie->read());
       COSPIKE_PRINTF("spike wfi state is %d\n", p->is_waiting_for_interrupt());
+      COSPIKE_PRINTF("core interrupt: %d exception: %d valid: %d insn: 0x% " PRIx64 "\n",
+          raise_interrupt, raise_exception, valid, insn);
     }
   }
   if (unset_seip) {

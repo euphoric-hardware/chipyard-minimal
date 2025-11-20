@@ -10,7 +10,9 @@ import "DPI-C" function void debug_rob_push_trace(input int     hartid,
                                                   input bit     trace_interrupt,
                                                   input longint trace_cause,
                                                   input longint trace_tval,
-                                                  input longint trace_wdata[8]);
+                                                  input longint trace_wdata[8],
+                                                  input longint unique_id,
+                                                );
 
 import "DPI-C" function void debug_rob_push_wb(input int     hartid,
                                                input bit     valid,
@@ -44,7 +46,8 @@ module DebugROBPushTrace (
                           input		trace_interrupt,
                           input [63:0]	trace_cause,
                           input [63:0]	trace_tval,
-                          input [511:0]	trace_wdata);
+                          input [511:0]	trace_wdata,
+                          input [63:0]  unique_id);
 
    longint __trace_wdata[8];
    genvar  i;
@@ -58,7 +61,7 @@ module DebugROBPushTrace (
                               should_wb, has_wb, wb_tag,
                               trace_valid, trace_iaddr, trace_insn,
                               trace_priv, trace_exception, trace_interrupt,
-                              trace_cause, trace_tval, __trace_wdata);
+                              trace_cause, trace_tval, __trace_wdata, unique_id);
       end
    end
 endmodule; // DebugROBPushTrace

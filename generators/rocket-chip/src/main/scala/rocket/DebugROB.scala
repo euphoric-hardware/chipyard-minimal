@@ -37,6 +37,7 @@ class DebugROBPushTrace(implicit val p: Parameters) extends BlackBox with HasBla
     val has_wb = Input(Bool())
     val wb_tag = Input(UInt(64.W))
     val trace = Input(new WidenedTracedInstruction)
+    val unique_id = Input(UInt(64.W))
   })
   addResource("/csrc/debug_rob.cc")
   addResource("/vsrc/debug_rob.v")
@@ -70,7 +71,7 @@ class DebugROBPopTrace(implicit val p: Parameters) extends BlackBox with HasBlac
 object DebugROB {
   def pushTrace(clock: Clock, reset: Reset,
     hartid: UInt, trace: TracedInstruction,
-    should_wb: Bool, has_wb: Bool, wb_tag: UInt)(implicit p: Parameters) = {
+    should_wb: Bool, has_wb: Bool, wb_tag: UInt, unique_id: UInt)(implicit p: Parameters) = {
     val debug_rob_push_trace = Module(new DebugROBPushTrace)
     debug_rob_push_trace.io.clock := clock
     debug_rob_push_trace.io.reset := reset
@@ -79,6 +80,7 @@ object DebugROB {
     debug_rob_push_trace.io.has_wb := has_wb
     debug_rob_push_trace.io.wb_tag := wb_tag
     debug_rob_push_trace.io.trace := trace
+    debug_rob_push_trace.io.unique_id := unique_id
   }
   def popTrace(clock: Clock, reset: Reset,
     hartid: UInt)(implicit p: Parameters): TracedInstruction = {

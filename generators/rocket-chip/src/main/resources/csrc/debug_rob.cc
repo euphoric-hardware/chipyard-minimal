@@ -1,7 +1,9 @@
+#include <cstdio>
 #include <map>
 #include <deque>
 #include <stdint.h>
 #include <cstring>
+#include <inttypes.h>
 
 #define WDATA_BITS (512)
 #define WDATA_BYTES (WDATA_BITS / 8)
@@ -23,6 +25,7 @@ typedef struct tagged_traced_insn_t {
 
   bool waiting;
   uint64_t wb_tag;
+  uint64_t unique_id;
 };
 
 typedef struct debug_rob_t {
@@ -33,18 +36,19 @@ typedef struct debug_rob_t {
 std::map<int, debug_rob_t*> debug_robs;
 
 extern "C" void debug_rob_push_trace(int hartid,
-				     char should_wb,
-				     char has_wb,
-				     long long int wb_tag,
-				     char trace_valid,
-				     long long int trace_iaddr,
-				     long long int trace_insn,
-				     int trace_priv,
-				     char trace_exception,
-				     char trace_interrupt,
-				     long long int trace_cause,
-				     long long int trace_tval,
-				     long long int* trace_wdata) {
+             char should_wb,
+             char has_wb,
+             long long int wb_tag,
+             char trace_valid,
+             long long int trace_iaddr,
+             long long int trace_insn,
+             int trace_priv,
+             char trace_exception,
+             char trace_interrupt,
+             long long int trace_cause,
+             long long int trace_tval,
+             long long int* trace_wdata,
+             long long int  unique_id) {
 
   if (debug_robs.find(hartid) == debug_robs.end())
     debug_robs[hartid] = new debug_rob_t;
@@ -61,15 +65,26 @@ extern "C" void debug_rob_push_trace(int hartid,
   insn->tval = trace_tval;
   insn->waiting = should_wb && !has_wb;
   insn->wb_tag = wb_tag;
+  insn->unique_id = unique_id;
   memcpy(insn->wdata, trace_wdata, WDATA_BYTES);
 
-  debug_robs[hartid]->rob.push_back(insn);
+  // Insert instruction in sorted order by unique_id (front to back)
+  // Required for superscalar cores where debug_push_rob can be called multiple times per cycle
+  auto& rob = debug_robs[hartid]->rob;
+  auto insert_pos = rob.end();
+  for (auto it = rob.begin(); it != rob.end(); ++it) {
+    if ((*it)->unique_id > unique_id) {
+      insert_pos = it;
+      break;
+    }
+  }
+  rob.insert(insert_pos, insn);
 }
 
 extern "C" void debug_rob_push_wb(int hartid,
-				  char valid,
-				  long long int wb_tag,
-				  long long int* wb_data) {
+          char valid,
+          long long int wb_tag,
+          long long int* wb_data) {
   if (debug_robs.find(hartid) == debug_robs.end())
     debug_robs[hartid] = new debug_rob_t;
 
@@ -82,15 +97,15 @@ extern "C" void debug_rob_push_wb(int hartid,
 }
 
 extern "C" void debug_rob_pop_trace(int hartid,
-				    char* trace_valid,
-				    long long int* trace_iaddr,
-				    long long int* trace_insn,
-				    int* trace_priv,
-				    char* trace_exception,
-				    char* trace_interrupt,
-				    long long int* trace_cause,
-				    long long int* trace_tval,
-				    long long int* trace_wdata) {
+            char* trace_valid,
+            long long int* trace_iaddr,
+            long long int* trace_insn,
+            int* trace_priv,
+            char* trace_exception,
+            char* trace_interrupt,
+            long long int* trace_cause,
+            long long int* trace_tval,
+            long long int* trace_wdata) {
   *trace_valid = 0;
   *trace_interrupt = 0;
   *trace_exception = 0;

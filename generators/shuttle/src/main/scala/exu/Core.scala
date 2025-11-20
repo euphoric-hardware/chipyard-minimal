@@ -626,7 +626,7 @@ class ShuttleCore(tile: ShuttleTile, edge: TLEdgeOut)(implicit p: Parameters) ex
       val size = Mux(ctrl.rocc, log2Ceil(64/8).U, uop.mem_size)
       mem_uops_reg(i).bits.rs2_data := new StoreGen(size, 0.U, uop.rs2_data, coreDataBytes).data
     }
-   }
+  }
 
   val ex_dmem_structural_hazard = io.dmem.req.valid && !io.dmem.req.ready
 
@@ -1015,6 +1015,9 @@ class ShuttleCore(tile: ShuttleTile, edge: TLEdgeOut)(implicit p: Parameters) ex
   val useDebugROB = shuttleParams.debugROB
   if (useDebugROB) {
     val trace = WireInit(csr.io.trace)
+    val pipe_bits = log2Ceil(coreParams.retireWidth + 1)
+    val tag_cycle = RegInit(0.U(64.W))
+    tag_cycle := tag_cycle + 1.U
     for (i <- 0 until retireWidth) {
       val pc = if (usingVector) Mux(io.vector.get.com.retire_late, io.vector.get.com.pc, com_uops(i).bits.pc) else com_uops(i).bits.pc
       trace(i).valid := com_retire(i) || ((i == 0).B && (csr.io.exception || io.vector.map(_.com.retire_late).getOrElse(false.B)))
@@ -1027,7 +1030,8 @@ class ShuttleCore(tile: ShuttleTile, edge: TLEdgeOut)(implicit p: Parameters) ex
         io.hartid, trace(i),
         should_wb,
         false.B,
-        rd + Mux(ctrl.wfd, 32.U, 0.U))
+        rd + Mux(ctrl.wfd, 32.U, 0.U),
+        (tag_cycle << pipe_bits) | i.U)
       io.trace.insns(i) := DebugROB.popTrace(clock, reset, io.hartid)
     }
   }

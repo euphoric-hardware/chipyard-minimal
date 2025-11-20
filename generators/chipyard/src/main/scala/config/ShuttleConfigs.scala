@@ -7,6 +7,8 @@ import org.chipsalliance.cde.config.{Config}
 //-----------------
 
 class ShuttleConfig extends Config(
+  new chipyard.config.WithTraceIO ++                             // enable trace-io for cosim
+  new shuttle.common.WithShuttleDebugROB ++                      // enable shuttle debug ROB for cosim
   new shuttle.common.WithNShuttleCores ++                        // 1x dual-issue shuttle core
   new chipyard.config.AbstractConfig)
 

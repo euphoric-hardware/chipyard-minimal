@@ -958,9 +958,11 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
         wb_addr := Cat(v.wb.rob_should_wb_fp, csr_trace_with_wdata.insn(11,7))
       }}
 
+      val tag_cycle = RegInit(0.U(64.W))
+      tag_cycle := tag_cycle + 1.U
       DebugROB.pushTrace(clock, reset,
         io.hartid, csr_trace_with_wdata,
-        should_wb, has_wb, wb_addr)
+        should_wb, has_wb, wb_addr, tag_cycle)
 
       io.trace.insns(0) := DebugROB.popTrace(clock, reset, io.hartid)
 
